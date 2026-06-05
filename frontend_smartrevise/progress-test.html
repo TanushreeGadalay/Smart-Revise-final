@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Progress Tracking Tester</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .content {
+            padding: 30px 20px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 2px solid #f0f0f0;
+            border-radius: 10px;
+        }
+
+        .section h2 {
+            color: #333;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        input, select, button {
+            padding: 10px 15px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1em;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+        }
+
+        input[type="text"], input[type="email"], input[type="number"], select {
+            width: 100%;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: #f44336;
+            margin-left: 10px;
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f5f5f5;
+            border-left: 4px solid #667eea;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .success {
+            color: #4caf50;
+            border-left-color: #4caf50;
+        }
+
+        .error {
+            color: #f44336;
+            border-left-color: #f44336;
+        }
+
+        .info {
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+
+        .badge-success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .help-text {
+            font-size: 0.9em;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 600px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 1.5em;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧪 Progress Tracking Tester</h1>
+            <p>Test the progress tracking endpoints</p>
+        </div>
+
+        <div class="content">
+            <div class="info">
+                <strong>ℹ️ Note:</strong> Make sure Flask is running on http://localhost:5000 before testing.
+            </div>
+
+            <!-- Section 1: Basic Info -->
+            <div class="section">
+                <h2>1️⃣ Get User Progress</h2>
+                <div class="form-group">
+                    <label>User Email:</label>
+                    <input type="email" id="getProgressEmail" placeholder="user@example.com" value="15horizonhaven@gmail.com">
+                </div>
+                <button onclick="getProgress()">Get Progress</button>
+                <div id="getProgressResult" class="result" style="display:none;"></div>
+            </div>
+
+            <!-- Section 2: Track Quiz -->
+            <div class="section">
+                <h2>2️⃣ Track Quiz Completion</h2>
+                <div class="form-group">
+                    <label>User Email:</label>
+                    <input type="email" id="quizEmail" placeholder="user@example.com" value="15horizonhaven@gmail.com">
+                </div>
+                <div class="form-group">
+                    <label>Quiz Topic:</label>
+                    <input type="text" id="quizTopic" placeholder="e.g., Arrays, Strings" value="Arrays">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Score:</label>
+                        <input type="number" id="quizScore" placeholder="8" value="8" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Total:</label>
+                        <input type="number" id="quizTotal" placeholder="10" value="10" min="1">
+                    </div>
+                </div>
+                <button onclick="trackQuiz()">Track Quiz</button>
+                <div id="quizResult" class="result" style="display:none;"></div>
+            </div>
+
+            <!-- Section 3: Track Notes -->
+            <div class="section">
+                <h2>3️⃣ Track Notes Reading</h2>
+                <div class="form-group">
+                    <label>User Email:</label>
+                    <input type="email" id="notesEmail" placeholder="user@example.com" value="15horizonhaven@gmail.com">
+                </div>
+                <div class="form-group">
+                    <label>Topic:</label>
+                    <input type="text" id="notesTopic" placeholder="e.g., Linked Lists" value="Linked Lists">
+                </div>
+                <div class="form-group">
+                    <label>Language:</label>
+                    <select id="notesLanguage">
+                        <option>Python</option>
+                        <option>JavaScript</option>
+                        <option>Java</option>
+                        <option>C++</option>
+                        <option>General</option>
+                    </select>
+                </div>
+                <button onclick="trackNotes()">Track Notes</button>
+                <div id="notesResult" class="result" style="display:none;"></div>
+            </div>
+
+            <!-- Section 4: Track Coding -->
+            <div class="section">
+                <h2>4️⃣ Track logic building</h2>
+                <div class="form-group">
+                    <label>User Email:</label>
+                    <input type="email" id="codingEmail" placeholder="user@example.com" value="15horizonhaven@gmail.com">
+                </div>
+                <div class="form-group">
+                    <label>Problem Name:</label>
+                    <input type="text" id="codingProblem" placeholder="e.g., Two Sum" value="Two Sum">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Language:</label>
+                        <select id="codingLanguage">
+                            <option>Python</option>
+                            <option>JavaScript</option>
+                            <option>Java</option>
+                            <option>C++</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Status:</label>
+                        <select id="codingStatus">
+                            <option>solved</option>
+                            <option>attempted</option>
+                        </select>
+                    </div>
+                </div>
+                <button onclick="trackCoding()">Track Coding</button>
+                <div id="codingResult" class="result" style="display:none;"></div>
+            </div>
+
+            <!-- Section 5: Quick Test -->
+            <div class="section">
+                <h2>⚡ Quick Test</h2>
+                <p style="margin-bottom: 15px; color: #666;">Add sample progress data quickly:</p>
+                <button onclick="addSampleData()" style="width: 100%; margin-bottom: 10px; background: #4caf50;">Add Sample Data</button>
+                <button onclick="clearResults()" style="width: 100%; background: #2196f3;">Clear All Results</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = "http://127.0.0.1:5000";
+
+        function displayResult(elementId, data, isSuccess = true) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<span class="status-badge ${isSuccess ? 'badge-success' : 'badge-error'}">${isSuccess ? 'SUCCESS' : 'ERROR'}</span><pre>${JSON.stringify(data, null, 2)}</pre>`;
+            element.style.display = "block";
+            element.className = `result ${isSuccess ? 'success' : 'error'}`;
+        }
+
+        async function getProgress() {
+            const email = document.getElementById("getProgressEmail").value;
+            if (!email) {
+                alert("Please enter email");
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/progress?email=${email}`);
+                const data = await response.json();
+                displayResult("getProgressResult", data, response.ok);
+            } catch (error) {
+                displayResult("getProgressResult", { error: error.message }, false);
+            }
+        }
+
+        async function trackQuiz() {
+            const email = document.getElementById("quizEmail").value;
+            const topic = document.getElementById("quizTopic").value;
+            const score = parseInt(document.getElementById("quizScore").value);
+            const total = parseInt(document.getElementById("quizTotal").value);
+
+            if (!email || !topic) {
+                alert("Please fill all fields");
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/progress/quiz`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        email,
+                        topic,
+                        score,
+                        total,
+                        date: new Date().toLocaleDateString()
+                    })
+                });
+
+                const data = await response.json();
+                displayResult("quizResult", data, response.ok);
+            } catch (error) {
+                displayResult("quizResult", { error: error.message }, false);
+            }
+        }
+
+        async function trackNotes() {
+            const email = document.getElementById("notesEmail").value;
+            const topic = document.getElementById("notesTopic").value;
+            const language = document.getElementById("notesLanguage").value;
+
+            if (!email || !topic) {
+                alert("Please fill all fields");
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/progress/notes`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        email,
+                        topic,
+                        language,
+                        date: new Date().toLocaleDateString()
+                    })
+                });
+
+                const data = await response.json();
+                displayResult("notesResult", data, response.ok);
+            } catch (error) {
+                displayResult("notesResult", { error: error.message }, false);
+            }
+        }
+
+        async function trackCoding() {
+            const email = document.getElementById("codingEmail").value;
+            const problem = document.getElementById("codingProblem").value;
+            const language = document.getElementById("codingLanguage").value;
+            const status = document.getElementById("codingStatus").value;
+
+            if (!email || !problem) {
+                alert("Please fill all fields");
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/progress/coding`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        email,
+                        problem,
+                        language,
+                        status,
+                        date: new Date().toLocaleDateString()
+                    })
+                });
+
+                const data = await response.json();
+                displayResult("codingResult", data, response.ok);
+            } catch (error) {
+                displayResult("codingResult", { error: error.message }, false);
+            }
+        }
+
+        async function addSampleData() {
+            const email = "15horizonhaven@gmail.com";
+            const topics = [
+                { quiz: "Arrays", notes: "Arrays", coding: "Two Sum" },
+                { quiz: "Strings", notes: "Strings", coding: "Palindrome" },
+                { quiz: "Trees", notes: "Binary Trees", coding: "Tree Traversal" }
+            ];
+
+            for (const item of topics) {
+                await trackQuizData(email, item.quiz, Math.floor(Math.random() * 3) + 7, 10);
+                await trackNotesData(email, item.notes, "Python");
+                await trackCodingData(email, item.coding, "Python", Math.random() > 0.3 ? "solved" : "attempted");
+            }
+
+            alert("✓ Sample data added! Check progress page.");
+        }
+
+        async function trackQuizData(email, topic, score, total) {
+            await fetch(`${API_BASE}/progress/quiz`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    email, topic, score, total,
+                    date: new Date().toLocaleDateString()
+                })
+            });
+        }
+
+        async function trackNotesData(email, topic, language) {
+            await fetch(`${API_BASE}/progress/notes`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    email, topic, language,
+                    date: new Date().toLocaleDateString()
+                })
+            });
+        }
+
+        async function trackCodingData(email, problem, language, status) {
+            await fetch(`${API_BASE}/progress/coding`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    email, problem, language, status,
+                    date: new Date().toLocaleDateString()
+                })
+            });
+        }
+
+        function clearResults() {
+            document.querySelectorAll(".result").forEach(el => el.style.display = "none");
+        }
+    </script>
+</body>
+
+</html>

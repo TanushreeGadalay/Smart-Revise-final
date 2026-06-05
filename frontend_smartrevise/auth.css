@@ -1,0 +1,113 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Poppins', sans-serif;
+}
+
+body{
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background: linear-gradient(135deg, #1e293b, #334155);
+}
+
+.container{
+    width:400px;
+    background:rgba(255,255,255,0.1);
+    backdrop-filter:blur(15px);
+    border-radius:20px;
+    padding:40px;
+    box-shadow:0 20px 50px rgba(0,0,0,0.5);
+    position:relative;
+}
+
+/* Hide radio buttons */
+input[type="radio"]{
+    display:none;
+}
+
+/* Tabs */
+.tabs{
+    display:flex;
+    justify-content:space-around;
+    margin-bottom:30px;
+}
+
+.tabs label{
+    color:white;
+    cursor:pointer;
+    padding:8px 20px;
+    border-radius:20px;
+    transition:0.3s;
+}
+
+/* Active tab */
+#login:checked ~ .tabs label[for="login"],
+#signup:checked ~ .tabs label[for="signup"]{
+    background:#3498db;
+}
+
+/* Form container */
+.form-container{
+    position:relative;
+    height:300px;
+}
+
+/* Both forms */
+.form{
+    position:absolute;
+    width:100%;
+    transition:0.5s;
+    opacity:0;
+    pointer-events:none;
+}
+
+/* Show login */
+#login:checked ~ .form-container .login-form{
+    opacity:1;
+    pointer-events:auto;
+}
+
+/* Show signup */
+#signup:checked ~ .form-container .signup-form{
+    opacity:1;
+    pointer-events:auto;
+}
+
+.form h2{
+    color:white;
+    margin-bottom:20px;
+}
+
+.form input{
+    width:100%;
+    padding:10px;
+    margin-bottom:15px;
+    border:none;
+    border-radius:8px;
+    outline:none;
+}
+
+.form button{
+    width:100%;
+    padding:10px;
+    border:none;
+    border-radius:8px;
+    background:#3498db;
+    color:white;
+    font-size:16px;
+    cursor:pointer;
+    margin-bottom:10px;
+}
+
+.form p{
+    color:white;
+    font-size:14px;
+}
+
+.link{
+    color:#3498db;
+    cursor:pointer;
+}

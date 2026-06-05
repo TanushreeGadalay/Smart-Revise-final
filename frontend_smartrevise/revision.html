@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>SmartRevise - Revision Generator</title>
+    <link rel="stylesheet" href="dashboard.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        .input-section {
+            padding: 40px 60px;
+            background: #fff;
+            text-align: center;
+        }
+
+        .topic-input {
+            width: 100%;
+            max-width: 600px;
+            padding: 15px 25px;
+            border-radius: 30px;
+            border: 2px solid #e2e8f0;
+            font-size: 16px;
+            outline: none;
+            margin-bottom: 20px;
+        }
+
+        .generate-btn {
+            background: linear-gradient(to right, #2563eb, #3b82f6);
+            color: white;
+            padding: 12px 40px;
+            border-radius: 30px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3);
+        }
+
+        .result-section {
+            padding: 40px 60px;
+            display: none;
+        }
+
+        .result-card {
+            background: #f8fafc;
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .loading {
+            display: none;
+            margin: 20px 0;
+            font-weight: 600;
+            color: #2563eb;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="outer-bg">
+        <div class="container">
+
+            <!-- Navbar -->
+            <nav class="navbar">
+                <div class="logo">🔷 SmartRevise AI</div>
+                <div class="nav-links">
+                    <a href="dashboard.html">Dashboard</a>
+                    <button class="logout-btn" onclick="logout()">Logout</button>
+                </div>
+            </nav>
+
+            <div class="input-section">
+                <h1>AI Revision Generator</h1>
+                <p>Enter a topic to generate smart notes and practice questions.</p>
+                <br>
+                <input type="text" id="topic" class="topic-input"
+                    placeholder="e.g. Python Functions, React Hooks, Data Structures">
+                <br>
+                <button class="generate-btn" onclick="generateRevision()">Generate Revision</button>
+                <div id="loading" class="loading">Generating your revision plan... ⏳</div>
+            </div>
+
+            <div id="result" class="result-section">
+                <div class="result-card">
+                    <h3>📘 Smart Notes</h3>
+                    <div id="notes-content"></div>
+                </div>
+                <div class="result-card">
+                    <h3>📝 Practice MCQs</h3>
+                    <div id="mcqs-content"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const user = JSON.parse(localStorage.getItem("user"));
+        if (!user) window.location.href = "auth.html";
+
+        function logout() {
+            localStorage.removeItem("user");
+            window.location.href = "auth.html";
+        }
+
+        async function generateRevision() {
+            const topic = document.getElementById("topic").value.trim();
+            if (!topic) return alert("Please enter a topic");
+
+            document.getElementById("loading").style.display = "block";
+            document.getElementById("result").style.display = "none";
+
+            try {
+                const response = await fetch("http://127.0.0.1:5000/generate", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ topic })
+                });
+
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || "Failed to generate revision");
+
+                document.getElementById("loading").style.display = "none";
+                document.getElementById("result").style.display = "block";
+                document.getElementById("notes-content").innerText = data.notes;
+
+                const mcqsHtml = data.mcqs.map(q => `<p>• ${q}</p>`).join("");
+                document.getElementById("mcqs-content").innerHTML = mcqsHtml;
+
+            } catch (err) {
+                alert(err.message);
+                document.getElementById("loading").style.display = "none";
+            }
+        }
+    </script>
+
+</body>
+
+</html>

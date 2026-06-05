@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Level up your logic building | SmartRevise AI</title>
+    <link rel="stylesheet" href="dashboard.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@400;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="logic-builder.css">
+</head>
+
+<body>
+    <div class="outer-bg">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+
+        <div class="logic-container">
+            <nav class="navbar" style="margin-bottom: 20px;">
+                <div class="logo">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--primary)">
+                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+                    </svg>
+                    SmartRevise AI
+                </div>
+                <div class="nav-links">
+                    <a href="dashboard.html" style="text-decoration:none; color: #475569; font-weight: 600;">Dashboard</a>
+                    <button class="logout-btn" onclick="logout()">Logout</button>
+                </div>
+            </nav>
+
+            <!-- Selection View -->
+            <div id="selection-view" class="selection-view">
+                <div class="header-section">
+                    <h1>Level up your logic building</h1>
+                    <p>Master algorithmic thinking through generalized programming logic</p>
+                </div>
+
+                <div class="difficulty-grid">
+                    <div class="diff-card elementary" style="animation-delay: 0.1s" onclick="loadLevel('elementary')">
+                        <div class="diff-icon">🌱</div>
+                        <h3>Elementary</h3>
+                        <p>Foundation problems like swapping, factorials, and prime checks.</p>
+                    </div>
+
+                    <div class="diff-card intermediate" style="animation-delay: 0.2s" onclick="loadLevel('intermediate')">
+                        <div class="diff-icon">⚡</div>
+                        <h3>Intermediate</h3>
+                        <p>Algorithmic logic including sorting, searching, and sequences.</p>
+                    </div>
+
+                    <div class="diff-card advanced" style="animation-delay: 0.3s" onclick="loadLevel('advanced')">
+                        <div class="diff-icon">🧠</div>
+                        <h3>Advanced</h3>
+                        <p>Complex structures, graph logic, and optimization strategies.</p>
+                    </div>
+                </div>
+
+                <div style="margin-top: 50px;">
+                    <a href="dashboard.html" style="text-decoration: none; color: #64748b; font-weight: 600;">← Back to Dashboard</a>
+                </div>
+            </div>
+
+            <!-- Workspace View -->
+            <div id="workspace-view" class="workspace-view">
+                <div class="back-nav">
+                    <button class="back-btn" onclick="showSelection()">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                        Change Level
+                    </button>
+                </div>
+
+                <div class="workspace-grid">
+                    <div class="problem-list" id="problem-list">
+                        <!-- Loaded via JS -->
+                    </div>
+
+                    <div class="logic-display" id="logic-display">
+                        <div id="display-content">
+                            <div style="text-align: center; color: #64748b; padding-top: 150px;">
+                                <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 20px; opacity: 0.5;">
+                                    <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                </svg>
+                                <h3>Select a question on the left to see generalized logic</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let problems = [];
+
+        async function loadLevel(level) {
+            try {
+                const response = await fetch(`http://127.0.0.1:5000/logic-builders?level=${level}`);
+                problems = await response.json();
+                
+                renderProblemList();
+                
+                document.getElementById('selection-view').style.display = 'none';
+                document.getElementById('workspace-view').style.display = 'flex';
+                
+                // Clear display
+                document.getElementById('display-content').innerHTML = `
+                    <div style="text-align: center; color: #64748b; padding-top: 150px;">
+                        <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 20px; opacity: 0.5;">
+                            <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                        </svg>
+                        <h3>Select a question on the left to see generalized logic</h3>
+                    </div>
+                `;
+            } catch (error) {
+                console.error("Error loading level:", error);
+                alert("Make sure the backend server (app.py) is running!");
+            }
+        }
+
+        function showSelection() {
+            document.getElementById('workspace-view').style.display = 'none';
+            document.getElementById('selection-view').style.display = 'block';
+        }
+
+        function renderProblemList() {
+            const listDiv = document.getElementById('problem-list');
+            listDiv.innerHTML = '';
+            
+            problems.forEach((prob, index) => {
+                const item = document.createElement('div');
+                item.className = 'problem-item';
+                item.innerHTML = `
+                    <div class="problem-badge">${index + 1}</div>
+                    <span>${prob.title}</span>
+                `;
+                item.onclick = () => displayLogic(prob, item);
+                listDiv.appendChild(item);
+            });
+        }
+
+        function displayLogic(prob, element) {
+            document.querySelectorAll('.problem-item').forEach(i => i.classList.remove('active'));
+            element.classList.add('active');
+
+            let stepsHtml = prob.logic.map((step, idx) => {
+                // Ensure emojis are handled correctly if they aren't already in the string
+                return `<div class="step-line">
+                    <span class="step-content">${formatLogicText(step)}</span>
+                </div>`;
+            }).join('');
+
+            document.getElementById('display-content').innerHTML = `
+                <div style="animation: fadeIn 0.4s ease-out;">
+                    <h2 style="font-size: 2.2rem; color: #1e3a8a; margin-bottom: 20px; font-weight: 800;">${prob.title}</h2>
+                    
+                    <div style="background: rgba(59, 130, 246, 0.05); padding: 20px; border-radius: 16px; margin-bottom: 30px; border-left: 4px solid #3b82f6;">
+                        <h4 style="color: #1e3a8a; margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
+                            <span>🧠 Goal:</span>
+                        </h4>
+                        <p style="color: #475569; font-size: 1.1rem; line-height: 1.5;">${prob.goal}</p>
+                    </div>
+
+                    <h4 style="color: #64748b; margin-bottom: 15px; font-weight: 700;">Algorithm:</h4>
+                    <div class="logic-steps">
+                        ${stepsHtml}
+                    </div>
+                    
+                    <p style="margin-top: 30px; font-size: 0.9rem; color: #94a3b8; font-style: italic;">
+                        * This generalized logic applies to C, C++, Java, Python, and JavaScript.
+                    </p>
+                </div>
+            `;
+        }
+
+        function formatLogicText(text) {
+            return text;
+        }
+
+        function logout() {
+            localStorage.removeItem("user");
+            window.location.href = "auth.html";
+        }
+    </script>
+</body>
+
+</html>

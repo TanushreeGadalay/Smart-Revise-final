@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>SmartRevise - Smart Notes</title>
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="smart-notes.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <div class="outer-bg">
+        <div class="container">
+            <!-- Navbar -->
+            <nav class="navbar">
+                <div class="logo">🔷 SmartRevise AI</div>
+                <div class="nav-links">
+                    <a href="dashboard.html" style="text-decoration:none; color:#1e40af; font-weight:600;">Dashboard</a>
+                    <button class="logout-btn" onclick="logout()">Logout</button>
+                </div>
+            </nav>
+
+            <div class="content-area">
+                <div class="header-text">
+                    <h1>📘 Smart Revision Notes</h1>
+                    <p>Select a programming language to proceed.</p>
+                </div>
+
+                <div class="language-grid" id="languageGrid">
+                    <div class="lang-card" onclick="selectLanguage('C')">
+                        <h4>C</h4>
+                    </div>
+                    <div class="lang-card" onclick="selectLanguage('C++')">
+                        <h4>C++</h4>
+                    </div>
+                    <div class="lang-card" onclick="selectLanguage('JavaScript')">
+                        <h4>JavaScript</h4>
+                    </div>
+                    <div class="lang-card" onclick="selectLanguage('Python')">
+                        <h4>Python</h4>
+                    </div>
+                    <div class="lang-card" onclick="selectLanguage('Java')">
+                        <h4>Java</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function selectLanguage(lang) {
+            window.location.href = `generate-notes.html?lang=${encodeURIComponent(lang)}`;
+        }
+
+        function logout() {
+            localStorage.removeItem("user");
+            window.location.href = "auth.html";
+        }
+
+        // Auth check
+        const user = JSON.parse(localStorage.getItem("user"));
+        if (!user) window.location.href = "auth.html";
+
+    </script>
+
+</body>
+
+</html>

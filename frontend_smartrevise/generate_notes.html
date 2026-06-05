@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>SmartRevise - Generate Notes</title>
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="generate_notes.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <div class="outer-bg">
+        <div class="container">
+            <!-- Navbar -->
+            <nav class="navbar">
+                <div class="logo">🔷 SmartRevise AI</div>
+                <div class="nav-links">
+                    <a href="smartnotes.html" class="back-link">← Select Language</a>
+                    <a href="dashboard.html" style="text-decoration:none; color:#1e40af; font-weight:600;">Dashboard</a>
+                    <button class="logout-btn" onclick="logout()">Logout</button>
+                </div>
+            </nav>
+
+            <div class="content-area">
+                <div class="header-text">
+                    <h1><span id="displayLang">...</span></h1>
+
+                    <h2>🚀 Generate summary / Fetch answers: </h2>
+                    <p>Enter your question or topic to get study notes.</p>
+                </div>
+
+                <div class="input-group">
+                    <textarea id="userQuestion" class="question-input"
+                        placeholder="What would you like to learn today? (e.g. explain memory management, how do pointers work...)"></textarea>
+                    <br>
+                    <button id="generateBtn" class="generate-btn" onclick="startGeneration()">Generate Notes</button>
+
+                    <div id="loading" class="loading-overlay">
+                        <div class="spinner"></div>
+                        <p>Generating your premium study notes... 🚀</p>
+                    </div>
+                </div>
+
+                <div id="result" class="result-section">
+                    <div class="result-card">
+                        <h3 id="resultTitle">Study Material</h3>
+                        <div id="notesOutput" class="markdown-content"></div>
+
+                        <h3 style="margin-top:40px;">📝 Practice Questions</h3>
+                        <div id="questionsOutput" class="markdown-content"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get language from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const selectedLang = urlParams.get('lang');
+
+        if (!selectedLang) {
+            alert("No language selected. Redirecting to selection page.");
+            window.location.href = "smartnotes.html";
+        }
+
+        document.getElementById("displayLang").innerText = selectedLang;
+
+        async function startGeneration() {
+            const question = document.getElementById("userQuestion").value.trim();
+            if (!question) return alert("Please enter a question or topic!");
+
+            const generateBtn = document.getElementById("generateBtn");
+            const loading = document.getElementById("loading");
+            const result = document.getElementById("result");
+
+            generateBtn.disabled = true;
+            loading.style.display = "block";
+            result.style.display = "none";
+
+            const topic = `${selectedLang}: ${question}`;
+
+            try {
+                const response = await fetch("http://127.0.0.1:5000/generate", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ topic, language: selectedLang })
+                });
+
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || "Generation failed");
+
+                displayResults(data);
+            } catch (err) {
+                alert(err.message);
+                generateBtn.disabled = false;
+                loading.style.display = "none";
+            }
+        }
+
+        function displayResults(data) {
+            document.getElementById("generateBtn").disabled = false;
+            document.getElementById("loading").style.display = "none";
+            document.getElementById("result").style.display = "block";
+
+            document.getElementById("resultTitle").innerText = `Study Material: ${selectedLang}`;
+            document.getElementById("notesOutput").innerText = data.notes;
+
+            const questions = [...data.mcqs, ...data.practice_questions];
+            document.getElementById("questionsOutput").innerHTML = questions.map(q => `<p style="margin-bottom:10px;">• ${q}</p>`).join("");
+
+            // Save to MongoDB
+            saveGeneratedNote(data);
+
+            // Scroll to results
+            document.getElementById("result").scrollIntoView({ behavior: 'smooth' });
+        }
+
+        async function saveGeneratedNote(content) {
+            const user = JSON.parse(localStorage.getItem("user"));
+            if (!user || !user.email) return;
+
+            const question = document.getElementById("userQuestion").value.trim();
+            const topic = `${selectedLang}: ${question}`;
+
+            try {
+                await fetch("http://127.0.0.1:5000/save-note", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        email: user.email,
+                        topic: topic,
+                        content: content,
+                        timestamp: new Date().toLocaleString()
+                    })
+                });
+                console.log("Note saved to MongoDB");
+            } catch (err) {
+                console.error("Failed to save note:", err);
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem("user");
+            window.location.href = "auth.html";
+        }
+
+        // Auth check
+        const user = JSON.parse(localStorage.getItem("user"));
+        if (!user) window.location.href = "auth.html";
+
+    </script>
+
+</body>
+
+</html>

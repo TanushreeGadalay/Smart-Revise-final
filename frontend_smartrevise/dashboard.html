@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>SmartRevise Dashboard</title>
+    <link rel="stylesheet" href="dashboard.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <div class="outer-bg">
+        <div class="container">
+
+            <!-- Navbar -->
+            <nav class="navbar">
+                <div class="logo">🔷 SmartRevise AI</div>
+
+                <div class="nav-links">
+                    <span id="welcome-user"></span>
+                    <button class="logout-btn" onclick="logout()">Logout</button>
+                </div>
+            </nav>
+
+            <!-- Hero Section -->
+            <section class="hero">
+                <div class="hero-left">
+                    <h1>Welcome Back!</h1>
+                    <h2>Continue your learning journey 🚀</h2>
+                </div>
+
+                <div class="hero-right">
+                    <img src="images/hero.png" alt="Illustration">
+                </div>
+            </section>
+
+            <!-- Features -->
+            <section class="features">
+
+                <div class="card" onclick="window.location.href='smart-notes.html'" style="cursor:pointer">
+                    <h3>📘 Smart Notes</h3>
+                    <p>Key concepts and summaries.</p>
+                </div>
+
+                <div class="card" onclick="window.location.href='mcqs.html'" style="cursor:pointer">
+                    <h3>📝 MCQs & Self Tests</h3>
+                    <p>Practice with quizzes.</p>
+                </div>
+
+                <div class="card" onclick="window.location.href='coding.html'" style="cursor:pointer">
+                    <h3>🧠 Logic Building</h3>
+                    <p>Hands-on coding challenges.</p>
+                </div>
+
+                <div class="card" onclick="window.location.href='progress.html'" style="cursor:pointer">
+                    <h3>📊 Check Your Progress</h3>
+                    <p>Track your learning progress.</p>
+                </div>
+
+            </section>
+
+        </div>
+    </div>
+
+    <script>
+
+        // Check login
+        const user = JSON.parse(localStorage.getItem("user"));
+
+        if (!user) {
+            window.location.href = "auth.html";
+        } else {
+            document.getElementById("welcome-user").innerText = "Hi, " + user.name;
+        }
+
+        function logout() {
+            localStorage.removeItem("user");
+            window.location.href = "auth.html";
+        }
+
+    </script>
+
+</body>
+
+</html>

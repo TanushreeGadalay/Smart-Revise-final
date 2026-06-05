@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>SmartRevise AI - MCQ Generator</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+        }
+
+        body{
+            font-family:'Poppins',sans-serif;
+            background:#f5f7fb;
+            min-height:100vh;
+            display:flex;
+            justify-content:center;
+            padding:40px 20px;
+        }
+
+        .container{
+            width:100%;
+            max-width:1000px;
+        }
+
+        .header{
+            text-align:center;
+            margin-bottom:40px;
+        }
+
+        .header h1{
+            font-size:48px;
+            color:#111827;
+            margin-bottom:10px;
+        }
+
+        .header p{
+            color:#6b7280;
+            font-size:18px;
+        }
+
+        .form-card{
+            background:white;
+            padding:30px;
+            border-radius:24px;
+            box-shadow:0 8px 30px rgba(0,0,0,0.08);
+            margin-bottom:40px;
+        }
+
+        .form-grid{
+            display:grid;
+            grid-template-columns:1fr 2fr auto;
+            gap:20px;
+            align-items:end;
+        }
+
+        label{
+            display:block;
+            margin-bottom:8px;
+            font-weight:600;
+            color:#111827;
+        }
+
+        select,
+        textarea{
+            width:100%;
+            padding:16px;
+            border-radius:14px;
+            border:1px solid #d1d5db;
+            font-size:16px;
+            font-family:'Poppins',sans-serif;
+            resize:none;
+        }
+
+        textarea{
+            height:90px;
+        }
+
+        button{
+            background:#4f46e5;
+            color:white;
+            border:none;
+            padding:16px 28px;
+            border-radius:14px;
+            font-size:16px;
+            font-weight:600;
+            cursor:pointer;
+            transition:0.3s;
+            height:58px;
+        }
+
+        button:hover{
+            background:#4338ca;
+            transform:translateY(-2px);
+        }
+
+        #mcqContainer{
+            display:flex;
+            flex-direction:column;
+            gap:25px;
+        }
+
+        .mcq-box{
+            background:white;
+            padding:28px;
+            border-radius:20px;
+            box-shadow:0 8px 25px rgba(0,0,0,0.06);
+        }
+
+        .question{
+            font-size:22px;
+            font-weight:600;
+            margin-bottom:20px;
+            line-height:1.6;
+            white-space:pre-line;
+        }
+
+        .options{
+            display:grid;
+            gap:14px;
+            margin-bottom:20px;
+        }
+
+        .option{
+            background:#f3f4f6;
+            padding:14px 18px;
+            border-radius:12px;
+            font-size:16px;
+        }
+
+        .answer{
+            display:inline-block;
+            background:#dcfce7;
+            color:#166534;
+            padding:10px 16px;
+            border-radius:10px;
+            font-weight:600;
+        }
+
+        .loading{
+            text-align:center;
+            color:#4f46e5;
+            font-weight:600;
+            margin-top:20px;
+            display:none;
+        }
+
+        @media(max-width:768px){
+
+            .form-grid{
+                grid-template-columns:1fr;
+            }
+
+            button{
+                width:100%;
+            }
+
+            .header h1{
+                font-size:34px;
+            }
+
+        }
+
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="header">
+        <h1>📝 SmartRevise AI</h1>
+        <p>Generate AI-powered MCQs instantly</p>
+    </div>
+
+    <div class="form-card">
+
+        <div class="form-grid">
+
+            <div>
+                <label>Select Language</label>
+
+                <select id="language">
+                    <option>C</option>
+                    <option>C++</option>
+                    <option>Java</option>
+                    <option>Python</option>
+                    <option>JavaScript</option>
+                </select>
+            </div>
+
+            <div>
+                <label>Enter Topic</label>
+
+                <textarea
+                    id="topic"
+                    placeholder="Example: Pointers, Inheritance, Loops..."></textarea>
+            </div>
+
+            <div>
+                <button onclick="generateMCQs()">
+                    Generate
+                </button>
+            </div>
+
+        </div>
+
+        <div class="loading" id="loading">
+            Generating MCQs...
+        </div>
+
+    </div>
+
+    <div id="mcqContainer"></div>
+
+</div>
+
+<script>
+
+async function generateMCQs(){
+
+    const language = document.getElementById("language").value;
+
+    const topic = document.getElementById("topic").value.trim();
+
+    if(!topic){
+        alert("Please enter a topic");
+        return;
+    }
+
+    document.getElementById("loading").style.display = "block";
+
+    document.getElementById("mcqContainer").innerHTML = "";
+
+    try{
+
+        const response = await fetch("http://127.0.0.1:5000/generate-mcqs",{
+
+            method:"POST",
+
+            headers:{
+                "Content-Type":"application/json"
+            },
+
+            body:JSON.stringify({
+                topic:`${language}: ${topic}`
+            })
+
+        });
+
+        const data = await response.json();
+
+        document.getElementById("loading").style.display = "none";
+
+        displayMCQs(data.mcqs);
+
+    }
+
+    catch(err){
+
+        document.getElementById("loading").style.display = "none";
+
+        alert("Error generating MCQs");
+
+        console.error(err);
+    }
+
+}
+
+function displayMCQs(mcqs){
+
+    const container = document.getElementById("mcqContainer");
+
+    container.innerHTML = mcqs.map((mcq,index)=>`
+
+        <div class="mcq-box">
+
+            <div class="question">
+${index+1}. ${mcq.question}
+            </div>
+
+            <div class="options">
+
+                <div class="option"><b>A)</b> ${mcq.options.A}</div>
+
+                <div class="option"><b>B)</b> ${mcq.options.B}</div>
+
+                <div class="option"><b>C)</b> ${mcq.options.C}</div>
+
+                <div class="option"><b>D)</b> ${mcq.options.D}</div>
+
+            </div>
+
+            <div class="answer">
+                ✓ Correct Answer: ${mcq.answer}
+            </div>
+
+        </div>
+
+    `).join("");
+
+}
+
+</script>
+
+</body>
+</html>
