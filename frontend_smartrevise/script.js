@@ -1,4 +1,4 @@
-const BACKEND_URL = "http://localhost:5000";
+const BACKEND_URL = "https://smart-revise-final.onrender.com";
 
 function handleKeyPress(event) {
   if (event.key === "Enter") {
