@@ -17,6 +17,16 @@ load_dotenv()
 
 from tasks import generate_revision
 
+import traceback
+import sys
+
+try:
+    # your existing app startup code
+    pass
+except Exception as e:
+    traceback.print_exc()
+    sys.exit(1)
+
 app = Flask(__name__)
 CORS(app)
 
