@@ -239,8 +239,11 @@ def save_note():
 # ------------------------
 # MCQ GENERATION
 # ------------------------
-@app.route("/generate-mcqs", methods=["POST"])
+@app.route("/generate-mcqs", methods=["POST", "OPTIONS"])
 def generate_mcqs_route():
+
+    if request.method == "OPTIONS":
+        return "", 200
 
     try:
 
@@ -280,6 +283,7 @@ Format:
         import time
 
         response = None
+        last_exception = None
 
         for attempt in range(3):
 
@@ -293,14 +297,17 @@ Format:
                 break
 
             except Exception as e:
-
+                last_exception = e
                 print("Retrying Gemini...", e)
+                traceback.print_exc()
 
                 time.sleep(3)
 
         if response is None:
+            err_msg = str(last_exception) if last_exception else "No response from Gemini"
             return jsonify({
-                "error": "Gemini is busy. Please try again."
+                "error": "Gemini is busy. Please try again.",
+                "detail": err_msg
             }), 500
 
         cleaned_text = response.text.strip()
@@ -308,7 +315,16 @@ Format:
         cleaned_text = cleaned_text.replace("```json", "")
         cleaned_text = cleaned_text.replace("```", "")
 
-        mcqs = json.loads(cleaned_text)
+        try:
+            mcqs = json.loads(cleaned_text)
+        except Exception as e:
+            print("Failed to parse Gemini output as JSON:", e)
+            traceback.print_exc()
+            return jsonify({
+                "error": "Invalid JSON from Gemini",
+                "raw_text": cleaned_text,
+                "detail": str(e)
+            }), 500
 
         return jsonify({
             "mcqs": mcqs
