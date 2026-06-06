@@ -28,7 +28,8 @@ except Exception as e:
     sys.exit(1)
 
 app = Flask(__name__)
-CORS(app)
+# Allow all origins to support file:// pages and local testing
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 # ------------------------
 # Database (In-Memory)
