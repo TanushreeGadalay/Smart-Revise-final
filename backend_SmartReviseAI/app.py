@@ -270,11 +270,11 @@ def local_mcq_generator(topic_text, count=5):
 
         if lang and lang.lower() in ("python", "java", "javascript", "c", "c++"):
             code_example = {
-                "python": f"def example():\n    pass",
-                "java": f"public class Example {{ }}",
-                "javascript": f"function example() {{ }}",
-                "c": f"int main() {{ return 0; }}",
-                "c++": f"#include <iostream>\nint main() {{ return 0; }}"
+                "python": "def example():\n    pass",
+                "java": "public class Example { }",
+                "javascript": "function example() { }",
+                "c": "int main() { return 0; }",
+                "c++": "#include <iostream>\nint main() { return 0; }"
             }.get(lang.lower(), "Example code depends on language.")
             unrelated = f"A usage example: {code_example}"
         else:
@@ -286,16 +286,21 @@ def local_mcq_generator(topic_text, count=5):
         letters = ["A", "B", "C", "D"]
         options_map = {letters[idx]: opts_rotated[idx] for idx in range(4)}
         correct_letter = letters[opts_rotated.index(correct)]
-        return options_map, correct_letter
+
+        # concise explanation for the correct answer
+        explanation = correct
+
+        return options_map, correct_letter, explanation
 
     mcqs_list = []
     for i in range(count):
         q_text = make_question(i)
-        options_map, correct_letter = make_options(i)
+        options_map, correct_letter, explanation = make_options(i)
         mcqs_list.append({
             "question": q_text,
             "options": options_map,
-            "answer": correct_letter
+            "answer": correct_letter,
+            "explanation": explanation
         })
 
     return mcqs_list

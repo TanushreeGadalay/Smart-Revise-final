@@ -312,34 +312,89 @@ async function generateMCQs(){
 function displayMCQs(mcqs){
 
     const container = document.getElementById("mcqContainer");
+    container.innerHTML = '';
 
-    container.innerHTML = mcqs.map((mcq,index)=>`
+    mcqs.forEach((mcq, index) => {
+        const box = document.createElement('div');
+        box.className = 'mcq-box';
 
-        <div class="mcq-box">
+        const qEl = document.createElement('div');
+        qEl.className = 'question';
+        qEl.textContent = `${index + 1}. ${mcq.question}`;
+        box.appendChild(qEl);
 
-            <div class="question">
-${index+1}. ${mcq.question}
-            </div>
+        const optionsEl = document.createElement('div');
+        optionsEl.className = 'options';
 
-            <div class="options">
+        ['A','B','C','D'].forEach(letter => {
+            const opt = document.createElement('label');
+            opt.className = 'option-label';
+            opt.style.display = 'flex';
+            opt.style.alignItems = 'center';
+            opt.style.gap = '12px';
 
-                <div class="option"><b>A)</b> ${mcq.options.A}</div>
+            const radio = document.createElement('input');
+            radio.type = 'radio';
+            radio.name = `q_${index}`;
+            radio.value = letter;
 
-                <div class="option"><b>B)</b> ${mcq.options.B}</div>
+            const span = document.createElement('div');
+            span.innerHTML = `<b>${letter})</b> ${mcq.options[letter]}`;
 
-                <div class="option"><b>C)</b> ${mcq.options.C}</div>
+            opt.appendChild(radio);
+            opt.appendChild(span);
+            optionsEl.appendChild(opt);
+        });
 
-                <div class="option"><b>D)</b> ${mcq.options.D}</div>
+        box.appendChild(optionsEl);
 
-            </div>
+        const controls = document.createElement('div');
+        controls.style.display = 'flex';
+        controls.style.justifyContent = 'space-between';
+        controls.style.alignItems = 'center';
 
-            <div class="answer">
-                ✓ Correct Answer: ${mcq.answer}
-            </div>
+        const revealBtn = document.createElement('button');
+        revealBtn.textContent = 'Show Explanation';
+        revealBtn.style.background = '#10b981';
+        revealBtn.style.color = '#fff';
+        revealBtn.style.border = 'none';
+        revealBtn.style.padding = '10px 16px';
+        revealBtn.style.borderRadius = '8px';
+        revealBtn.style.cursor = 'pointer';
 
-        </div>
+        const explanationEl = document.createElement('div');
+        explanationEl.style.display = 'none';
+        explanationEl.style.marginTop = '12px';
+        explanationEl.style.background = '#f8fafc';
+        explanationEl.style.padding = '12px';
+        explanationEl.style.borderRadius = '8px';
 
-    `).join("");
+        revealBtn.addEventListener('click', () => {
+            const correctLetter = mcq.answer;
+            // highlight correct option
+            const labels = optionsEl.querySelectorAll('.option-label');
+            labels.forEach(label => {
+                const r = label.querySelector('input');
+                if (r.value === correctLetter) {
+                    label.style.background = '#d1fae5';
+                    label.style.border = '2px solid #10b981';
+                } else {
+                    label.style.opacity = '0.7';
+                }
+                r.disabled = true;
+            });
+
+            explanationEl.textContent = mcq.explanation || (`Correct: ${correctLetter}`);
+            explanationEl.style.display = 'block';
+            revealBtn.disabled = true;
+        });
+
+        controls.appendChild(revealBtn);
+        box.appendChild(controls);
+        box.appendChild(explanationEl);
+
+        container.appendChild(box);
+    });
 
 }
 
