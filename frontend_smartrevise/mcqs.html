@@ -203,6 +203,9 @@
                     <option>Python</option>
                     <option>JavaScript</option>
                 </select>
+                <div style="margin-top:8px;">
+                    <label style="font-weight:500; font-size:14px;"><input type="checkbox" id="useLocal" style="margin-right:8px;"> Use local generator only</label>
+                </div>
             </div>
 
             <div>
@@ -250,7 +253,10 @@ async function generateMCQs(){
 
     try{
 
-        const response = await fetch("http://127.0.0.1:5000/generate-mcqs",{
+        const useLocal = document.getElementById('useLocal') && document.getElementById('useLocal').checked;
+        const endpoint = useLocal ? "http://127.0.0.1:5000/generate-mcqs-local" : "http://127.0.0.1:5000/generate-mcqs";
+
+        const response = await fetch(endpoint,{
 
             method:"POST",
 
