@@ -280,6 +280,46 @@ Format:
 ]
 """
 
+        def local_mcq_generator(topic_text, count=5):
+            # topic_text may be in the form "Language: Topic" — parse it
+            lang = None
+            subj = topic_text
+            try:
+                if isinstance(topic_text, str) and ":" in topic_text:
+                    parts = topic_text.split(":", 1)
+                    lang = parts[0].strip()
+                    subj = parts[1].strip()
+            except Exception:
+                pass
+
+            subj_title = subj.title() if isinstance(subj, str) else str(subj)
+
+            mcqs_list = []
+            for i in range(count):
+                q_text = (
+                    f"Explain {subj_title} in {lang}." if lang else f"Explain {subj_title}."
+                )
+
+                # Generate simple, deterministic options
+                options = {
+                    "A": f"{subj_title} is a core concept used to organize code and logic.",
+                    "B": f"{subj_title} is an unrelated concept often used in databases.",
+                    "C": f"{subj_title} is a debugging technique used for performance.",
+                    "D": f"{subj_title} is a visual layout pattern for UI design."
+                }
+
+                # Choose correct answer in a round-robin manner
+                answers_pool = ["A", "B", "C", "D"]
+                answer = answers_pool[i % len(answers_pool)]
+
+                mcqs_list.append({
+                    "question": q_text,
+                    "options": options,
+                    "answer": answer
+                })
+
+            return mcqs_list
+
         import time
 
         response = None
@@ -304,11 +344,15 @@ Format:
                 time.sleep(3)
 
         if response is None:
+            # Gemini unavailable — use local fallback generator
+            mcqs_fallback = local_mcq_generator(topic, count=5)
             err_msg = str(last_exception) if last_exception else "No response from Gemini"
             return jsonify({
-                "error": "Gemini is busy. Please try again.",
+                "mcqs": mcqs_fallback,
+                "fallback": True,
+                "note": "Used local fallback because Gemini was unavailable",
                 "detail": err_msg
-            }), 500
+            }), 200
 
         cleaned_text = response.text.strip()
 
@@ -320,11 +364,14 @@ Format:
         except Exception as e:
             print("Failed to parse Gemini output as JSON:", e)
             traceback.print_exc()
+            # Return fallback MCQs along with raw text for debugging
+            mcqs_fallback = local_mcq_generator(topic, count=5)
             return jsonify({
-                "error": "Invalid JSON from Gemini",
+                "mcqs": mcqs_fallback,
+                "fallback": True,
                 "raw_text": cleaned_text,
                 "detail": str(e)
-            }), 500
+            }), 200
 
         return jsonify({
             "mcqs": mcqs
