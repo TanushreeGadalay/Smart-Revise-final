@@ -294,28 +294,62 @@ Format:
 
             subj_title = subj.title() if isinstance(subj, str) else str(subj)
 
+            def make_question(i):
+                # Vary question phrasing
+                templates = [
+                    f"What is {subj_title}?",
+                    f"Which of the following best describes {subj_title}?",
+                    f"How is {subj_title} typically used in {lang if lang else 'programming'}?",
+                    f"Which statement about {subj_title} is TRUE?",
+                    f"Choose the correct explanation for {subj_title}."
+                ]
+                return templates[i % len(templates)]
+
+            def make_options(i):
+                # Correct explanation
+                correct = f"{subj_title} is a core concept used to structure data and behavior in {lang if lang else 'programming'} applications."
+
+                # Common misconception / partial
+                partial = f"{subj_title} relates to some aspects of code organization but is not solely responsible for logic flow."
+
+                # False statement
+                falsey = f"{subj_title} is a low-level debugging tool used for performance tuning."
+
+                # Unrelated option (sometimes include a short code example when language known)
+                if lang and lang.lower() in ("python", "java", "javascript", "c", "c++"):
+                    code_example = {
+                        "python": f"Example: def example():\n    pass",
+                        "java": f"Example: public class Example {{ }}",
+                        "javascript": f"Example: function example() {{ }}",
+                        "c": f"Example: int main() {{ return 0; }}",
+                        "c++": f"Example: #include <iostream>\nint main() {{ return 0; }}"
+                    }.get(lang.lower(), "Example code depends on language.")
+                    unrelated = f"A usage example: {code_example}"
+                else:
+                    unrelated = f"{subj_title} is sometimes confused with unrelated topics like UI layout."
+
+                opts = [correct, partial, falsey, unrelated]
+
+                # Rotate options deterministically per question to vary position
+                shift = i % 4
+                opts_rotated = opts[shift:] + opts[:shift]
+
+                letters = ["A", "B", "C", "D"]
+                options_map = {letters[idx]: opts_rotated[idx] for idx in range(4)}
+
+                # Determine which letter holds the correct answer
+                correct_letter = letters[opts_rotated.index(correct)]
+
+                return options_map, correct_letter
+
             mcqs_list = []
             for i in range(count):
-                q_text = (
-                    f"Explain {subj_title} in {lang}." if lang else f"Explain {subj_title}."
-                )
-
-                # Generate simple, deterministic options
-                options = {
-                    "A": f"{subj_title} is a core concept used to organize code and logic.",
-                    "B": f"{subj_title} is an unrelated concept often used in databases.",
-                    "C": f"{subj_title} is a debugging technique used for performance.",
-                    "D": f"{subj_title} is a visual layout pattern for UI design."
-                }
-
-                # Choose correct answer in a round-robin manner
-                answers_pool = ["A", "B", "C", "D"]
-                answer = answers_pool[i % len(answers_pool)]
-
+                q_text = make_question(i)
+                options_map, correct_letter = make_options(i)
                 mcqs_list.append({
                     "question": q_text,
-                    "options": options,
-                    "answer": answer
+                    "options": options_map,
+                    "answer": correct_letter
                 })
 
             return mcqs_list
