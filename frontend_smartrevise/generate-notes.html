@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="dashboard.css">
     <link rel="stylesheet" href="generate-notes.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="progress-tracker.js"></script>
 </head>
 
 <body>
@@ -99,15 +100,31 @@
             }
         }
 
+        function normalizeNoteText(text) {
+            if (typeof text !== 'string') {
+                return JSON.stringify(text, null, 2);
+            }
+
+            let normalized = text.trim();
+            normalized = normalized.replace(/\s*•\s*/g, '\n• ');
+            normalized = normalized.replace(/(Example)(?=[A-Za-z0-9"'`#])/g, '\n$1');
+            normalized = normalized.replace(/(About Printing|Python Numbers|Python Strings|Python Casting Examples|Python Data Types|Python List|Python Tuples|Python Sets|Python Dictionaries)(?=[^\n])/g, '\n$1');
+            normalized = normalized.replace(/\n{2,}/g, '\n\n');
+            return normalized;
+        }
+
         function displayResults(data) {
             document.getElementById("generateBtn").disabled = false;
             document.getElementById("loading").style.display = "none";
             document.getElementById("result").style.display = "block";
 
             document.getElementById("resultTitle").innerText = `Study Material: ${selectedLang}`;
-            document.getElementById("notesOutput").innerText = data.notes;
+            const notesText = normalizeNoteText(typeof data.notes === 'string' ? data.notes : JSON.stringify(data.notes, null, 2));
+            document.getElementById("notesOutput").innerText = notesText;
 
-            const questions = [...data.mcqs, ...data.practice_questions];
+            const mcqs = Array.isArray(data.mcqs) ? data.mcqs : [];
+            const practiceQuestions = Array.isArray(data.practice_questions) ? data.practice_questions : [];
+            const questions = [...mcqs, ...practiceQuestions].filter(Boolean);
             document.getElementById("questionsOutput").innerHTML = questions.map(q => `<p style="margin-bottom:10px;">• ${q}</p>`).join("");
 
             // Save to MongoDB
@@ -136,6 +153,10 @@
                     })
                 });
                 console.log("Note saved to MongoDB");
+
+                // Track progress
+                await trackNotesCompletion(topic, selectedLang);
+                showProgressNotification("✓ Study notes completed and progress tracked!");
             } catch (err) {
                 console.error("Failed to save note:", err);
             }

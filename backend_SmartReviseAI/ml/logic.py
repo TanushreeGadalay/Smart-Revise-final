@@ -3,7 +3,26 @@ from pymongo import MongoClient
 
 client = MongoClient("mongodb://localhost:27017/")
 db = client["smartrevise"]
-dataset = db["python_library"]
+
+
+def get_collection_from_language(language):
+    """Select the correct MongoDB collection based on language"""
+    lang_lower = language.lower().strip()
+    
+    if lang_lower == "c++":
+        return db["cpp_library"]
+    elif lang_lower == "c":
+        return db["c_library"]
+    elif lang_lower == "java":
+        return db["java_library"]
+    elif lang_lower == "python":
+        return db["python_library"]
+    elif lang_lower == "javascript":
+        return db["javascript_library"]
+    else:
+        # Default to Python if unknown
+        return db["python_library"]
+
 
 
 def count_bullet_points(text):
@@ -47,6 +66,9 @@ def ensure_minimum_bullets(notes, language, topic, minimum=10):
 
 
 def generate_content(language, topic):
+    # Get the correct collection for this language
+    dataset = get_collection_from_language(language)
+    
     result = dataset.find_one({
         "content": {"$regex": topic, "$options": "i"}
     })
